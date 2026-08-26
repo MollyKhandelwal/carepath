@@ -10,87 +10,79 @@ import simulationsRouter from "./routes/simulations.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-async function startServer() {
-  const app = express();
+const app = express();
 
-  // =========================
-  // CORS
-  // =========================
+// =========================
+// CORS
+// =========================
 
-  app.use((req, res, next) => {
-    res.header(
-      "Access-Control-Allow-Origin",
-      "http://localhost:3004",
-    );
+app.use((req, res, next) => {
+  const allowedOrigin = req.headers.origin;
 
-    res.header(
-      "Access-Control-Allow-Methods",
-      "GET,POST,PUT,PATCH,DELETE,OPTIONS",
-    );
+  if (allowedOrigin) {
+    res.header("Access-Control-Allow-Origin", allowedOrigin);
+  }
 
-    res.header(
-      "Access-Control-Allow-Headers",
-      "Content-Type, Authorization",
-    );
+  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
-    if (req.method === "OPTIONS") {
-      return res.sendStatus(204);
-    }
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
 
-    next();
-  });
+  next();
+});
 
-  // =========================
-  // MIDDLEWARE
-  // =========================
+// =========================
+// MIDDLEWARE
+// =========================
 
-  app.use(express.json({ limit: "1mb" }));
+app.use(express.json({ limit: "1mb" }));
 
-  // Temporary request debugging
-  app.use((req, _res, next) => {
-    console.log("REQUEST:", req.method, req.originalUrl);
-    console.log("BODY:", req.body);
-    next();
-  });
+app.use((req, _res, next) => {
+  console.log("REQUEST:", req.method, req.originalUrl);
+  console.log("BODY:", req.body);
+  next();
+});
 
-  // =========================
-  // API ROUTES
-  // =========================
+// =========================
+// API ROUTES
+// =========================
 
-  app.use("/api/health", healthRouter);
-  app.use("/api/scenarios", scenariosRouter);
-  app.use("/api/pathways", pathwaysRouter);
-  app.use("/api/simulations", simulationsRouter);
+app.use("/api/health", healthRouter);
+app.use("/api/scenarios", scenariosRouter);
+app.use("/api/pathways", pathwaysRouter);
+app.use("/api/simulations", simulationsRouter);
 
-  // =========================
-  // FRONTEND STATIC FILES
-  // =========================
+// =========================
+// FRONTEND STATIC FILES
+// =========================
 
-  // Frontend build is located at:
-  // carepath/dist/public
-  //
-  // This works both when running:
-  //   npx tsx server/index.ts
-  // and when running the compiled server from dist.
+const staticPath = path.resolve(__dirname, "..", "dist", "public");
 
-  const staticPath = path.resolve(__dirname, "..", "dist", "public");
+console.log("Frontend static path:", staticPath);
 
-  console.log("Frontend static path:", staticPath);
+app.use(express.static(staticPath));
 
-  app.use(express.static(staticPath));
+// =========================
+// FRONTEND ROUTING
+// =========================
 
-  // =========================
-  // FRONTEND ROUTING
-  // =========================
+app.get("*", (_req, res) => {
+  res.sendFile(path.join(staticPath, "index.html"));
+});
 
-  app.get("*", (_req, res) => {
-    res.sendFile(path.join(staticPath, "index.html"));
-  });
+// =========================
+// EXPORT FOR VERCEL
+// =========================
 
-  // =========================
-  // START SERVER
-  // =========================
+export default app;
 
+// =========================
+// LOCAL DEVELOPMENT
+// =========================
+
+if (process.env.NODE_ENV !== "production") {
   const port = Number(process.env.PORT) || 3000;
 
   app.listen(port, () => {
@@ -107,9 +99,3 @@ async function startServer() {
     console.log("");
   });
 }
-
-startServer().catch((error) => {
-  console.error("Failed to start CarePath server:");
-  console.error(error);
-  process.exit(1);
-});
