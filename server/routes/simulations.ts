@@ -1,13 +1,13 @@
-import { Router } from "express";
-import { eq } from "drizzle-orm";
+import { Router, Request, Response } from "express";
 
+import { eq } from "drizzle-orm";
 import { db } from "../db/index.js";
 import { simulations } from "../db/schema.js";
 
 const router = Router();
 
 // GET all simulations
-router.get("/", async (_req, res) => {
+router.get("/", async (_req: Request, res: Response) => {
   try {
     const result = await db.select().from(simulations);
 
@@ -26,46 +26,51 @@ router.get("/", async (_req, res) => {
 });
 
 // GET simulations for a specific scenario
-router.get("/scenario/:scenarioId", async (req, res) => {
-  try {
-    const scenarioId = Number(req.params.scenarioId);
+router.get(
+  "/scenario/:scenarioId",
+  async (req: Request, res: Response) => {
+    try {
+      const scenarioId = Number(req.params.scenarioId);
 
-    if (!Number.isInteger(scenarioId)) {
-      return res.status(400).json({
+      if (!Number.isInteger(scenarioId)) {
+        res.status(400).json({
+          success: false,
+          message: "Invalid scenarioId",
+        });
+        return;
+      }
+
+      const result = await db
+        .select()
+        .from(simulations)
+        .where(eq(simulations.scenarioId, scenarioId));
+
+      res.json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      console.error("Failed to fetch scenario simulations:", error);
+
+      res.status(500).json({
         success: false,
-        message: "Invalid scenarioId",
+        message: "Failed to fetch scenario simulations",
       });
     }
-
-    const result = await db
-      .select()
-      .from(simulations)
-      .where(eq(simulations.scenarioId, scenarioId));
-
-    res.json({
-      success: true,
-      data: result,
-    });
-  } catch (error) {
-    console.error("Failed to fetch scenario simulations:", error);
-
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch scenario simulations",
-    });
   }
-});
+);
 
 // POST a new simulation
-router.post("/", async (req, res) => {
+router.post("/", async (req: Request, res: Response) => {
   try {
     const { scenarioId, input, result } = req.body;
 
     if (!scenarioId || !input || !result) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: "scenarioId, input and result are required",
       });
+      return;
     }
 
     const [simulation] = await db

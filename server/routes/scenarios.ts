@@ -1,11 +1,12 @@
-import { Router } from "express";
+import { Router, Request, Response } from "express";
+
 import { db } from "../db/index.js";
 import { scenarios } from "../db/schema.js";
 
 const router = Router();
 
 // GET all scenarios
-router.get("/", async (_req, res) => {
+router.get("/", async (_req: Request, res: Response) => {
   try {
     const result = await db.select().from(scenarios);
 
@@ -24,15 +25,16 @@ router.get("/", async (_req, res) => {
 });
 
 // POST a new scenario
-router.post("/", async (req, res) => {
+router.post("/", async (req: Request, res: Response) => {
   try {
     const { name, location, careStage, status } = req.body;
 
     if (!name || !location || !careStage) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: "name, location and careStage are required",
       });
+      return;
     }
 
     const [scenario] = await db

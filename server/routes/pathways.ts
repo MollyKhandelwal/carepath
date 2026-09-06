@@ -1,11 +1,12 @@
-import { Router } from "express";
+import { Router, Request, Response } from "express";
+
 import { db } from "../db/index.js";
 import { pathways } from "../db/schema.js";
 
 const router = Router();
 
 // GET all pathways
-router.get("/", async (_req, res) => {
+router.get("/", async (_req: Request, res: Response) => {
   try {
     const result = await db.select().from(pathways);
 
@@ -24,7 +25,7 @@ router.get("/", async (_req, res) => {
 });
 
 // POST a new pathway
-router.post("/", async (req, res) => {
+router.post("/", async (req: Request, res: Response) => {
   try {
     const {
       scenarioId,
@@ -42,11 +43,12 @@ router.post("/", async (req, res) => {
       !estimatedCost ||
       !coverageFit
     ) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message:
           "scenarioId, hospital, roomType, estimatedCost and coverageFit are required",
       });
+      return;
     }
 
     const [pathway] = await db
