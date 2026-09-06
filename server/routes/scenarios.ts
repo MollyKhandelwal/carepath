@@ -1,4 +1,4 @@
-import { Router, Request, Response } from "express";
+import { Router, type Request, type Response } from "express";
 
 import { db } from "../db/index.js";
 import { scenarios } from "../db/schema.js";

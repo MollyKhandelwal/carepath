@@ -1,6 +1,7 @@
-import { Router, Request, Response } from "express";
+import { Router, type Request, type Response } from "express";
 
 import { eq } from "drizzle-orm";
+
 import { db } from "../db/index.js";
 import { simulations } from "../db/schema.js";
 
