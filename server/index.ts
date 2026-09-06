@@ -1,9 +1,4 @@
-import express, {
-  type Request,
-  type Response,
-  type NextFunction,
-} from "express";
-
+import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -21,36 +16,29 @@ const app = express();
 // CORS
 // =========================
 
-app.use(
-  (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
-    const allowedOrigin = req.headers.origin;
+app.use((req, res, next) => {
+  const allowedOrigin = req.headers.origin;
 
-    if (allowedOrigin) {
-      res.header("Access-Control-Allow-Origin", allowedOrigin);
-    }
-
-    res.header(
-      "Access-Control-Allow-Methods",
-      "GET,POST,PUT,PATCH,DELETE,OPTIONS"
-    );
-
-    res.header(
-      "Access-Control-Allow-Headers",
-      "Content-Type, Authorization"
-    );
-
-    if (req.method === "OPTIONS") {
-      res.sendStatus(204);
-      return;
-    }
-
-    next();
+  if (allowedOrigin) {
+    res.header("Access-Control-Allow-Origin", allowedOrigin);
   }
-);
+
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET,POST,PUT,PATCH,DELETE,OPTIONS"
+  );
+
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization"
+  );
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
+
+  next();
+});
 
 // =========================
 // MIDDLEWARE
@@ -58,17 +46,12 @@ app.use(
 
 app.use(express.json({ limit: "1mb" }));
 
-app.use(
-  (
-    req: Request,
-    _res: Response,
-    next: NextFunction
-  ) => {
-    console.log("REQUEST:", req.method, req.originalUrl);
-    console.log("BODY:", req.body);
-    next();
-  }
-);
+app.use((req, _res, next) => {
+  console.log("REQUEST:", req.method, req.originalUrl);
+  console.log("BODY:", req.body);
+
+  next();
+});
 
 // =========================
 // API ROUTES
@@ -83,12 +66,7 @@ app.use("/api/simulations", simulationsRouter);
 // FRONTEND STATIC FILES
 // =========================
 
-const staticPath = path.resolve(
-  __dirname,
-  "..",
-  "dist",
-  "public"
-);
+const staticPath = path.resolve(__dirname, "..", "dist", "public");
 
 console.log("Frontend static path:", staticPath);
 
@@ -98,7 +76,7 @@ app.use(express.static(staticPath));
 // FRONTEND ROUTING
 // =========================
 
-app.get("*", (_req: Request, res: Response) => {
+app.get("*", (_req, res) => {
   res.sendFile(path.join(staticPath, "index.html"));
 });
 
@@ -118,14 +96,20 @@ if (process.env.NODE_ENV !== "production") {
   app.listen(port, () => {
     console.log("");
     console.log("=================================");
-    console.log("       CAREPATH SERVER");
+    console.log("        CAREPATH SERVER");
     console.log("=================================");
-    console.log(`Server:      http://localhost:${port}`);
-    console.log(`Health API:  http://localhost:${port}/api/health`);
-    console.log(`Scenarios:   http://localhost:${port}/api/scenarios`);
-    console.log(`Pathways:    http://localhost:${port}/api/pathways`);
+    console.log(`Server:       http://localhost:${port}`);
     console.log(
-      `Simulations: http://localhost:${port}/api/simulations`
+      `Health API:   http://localhost:${port}/api/health`
+    );
+    console.log(
+      `Scenarios:    http://localhost:${port}/api/scenarios`
+    );
+    console.log(
+      `Pathways:     http://localhost:${port}/api/pathways`
+    );
+    console.log(
+      `Simulations:  http://localhost:${port}/api/simulations`
     );
     console.log("=================================");
     console.log("");
