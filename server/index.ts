@@ -1,4 +1,4 @@
-import express, { Request, Response, NextFunction } from "express";
+import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -16,7 +16,7 @@ const app = express();
 // CORS
 // =========================
 
-app.use((req: Request, res: Response, next: NextFunction) => {
+app.use((req: any, res: any, next: any) => {
   const allowedOrigin = req.headers.origin;
 
   if (allowedOrigin) {
@@ -34,7 +34,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   );
 
   if (req.method === "OPTIONS") {
-    return res.sendStatus(204);
+    res.sendStatus(204);
+    return;
   }
 
   next();
@@ -46,7 +47,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 app.use(express.json({ limit: "1mb" }));
 
-app.use((req: Request, _res: Response, next: NextFunction) => {
+app.use((req: any, _res: any, next: any) => {
   console.log("REQUEST:", req.method, req.originalUrl);
   console.log("BODY:", req.body);
   next();
@@ -75,7 +76,7 @@ app.use(express.static(staticPath));
 // FRONTEND ROUTING
 // =========================
 
-app.get("*", (_req: Request, res: Response) => {
+app.get("*", (req: any, res: any) => {
   res.sendFile(path.join(staticPath, "index.html"));
 });
 
