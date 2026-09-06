@@ -2,11 +2,6 @@
   "version": 2,
   "buildCommand": "npx --yes pnpm@10.4.1 run build",
   "outputDirectory": "client/dist",
-  "functions": {
-    "server/index.ts": {
-      "runtime": "nodejs22.x"
-    }
-  },
   "rewrites": [
     {
       "source": "/api/:path*",
